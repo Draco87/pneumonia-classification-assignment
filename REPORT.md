@@ -206,4 +206,3 @@ The model is not clinically deployable. Its low-resolution pediatric benchmark d
 
 1. Yang J, Shi R, Wei D, et al. MedMNIST v2: A large-scale lightweight benchmark for 2D and 3D biomedical image classification. *Scientific Data*. 2023.
 2. MedMNIST project and dataset documentation: https://medmnist.com/
-3. Kermany DS, Goldbaum M, Cai W, et al. Identifying medical diagnoses and treatable diseases by image-based deep learning. *Cell*. 2018.
