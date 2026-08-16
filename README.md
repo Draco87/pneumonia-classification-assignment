@@ -155,9 +155,10 @@ These generate training curves, correct predictions, failure cases, ROC curves, 
 
 ## Single-image inference
 
-Run the baseline model on the included demonstration image:
+Run the baseline model on the included exported demonstration image:
 
 ```powershell
+python export_test_img.py
 python inference.py --image results/example_test_xray.png
 ```
 
