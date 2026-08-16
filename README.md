@@ -49,7 +49,6 @@ before the classifier and conservative training-time augmentation.
 ├── README.md                     # Setup, usage, and project overview
 ├── REPORT.md                     # Editable report source
 ├── report.pdf                    # Submission report
-├── build_report.py               # Generate report.pdf from REPORT.md and result plots
 ├── requirements.txt
 ├── dataset_analysis.py           # Dataset statistics and sample plots
 ├── train.py                      # Baseline training
