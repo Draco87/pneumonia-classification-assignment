@@ -56,11 +56,9 @@ Horizontal flipping was avoided because augmentation should preserve plausible r
 
 The baseline is a compact PyTorch CNN:
 
-1. 3 x 3 convolution, 1 to 32 channels; ReLU; 2 x 2 max pooling
-2. 3 x 3 convolution, 32 to 64 channels; ReLU; 2 x 2 max pooling
-3. 3 x 3 convolution, 64 to 128 channels; ReLU
-4. Adaptive average pooling to 1 x 1
-5. Linear layer from 128 features to one output logit
+![Baseline CNN architecture](results/baseline_arch.png)
+
+*Figure: Baseline CNN architecture and feature-map dimensions.*
 
 The architecture was chosen because it is easy to train on a CPU, has sufficient capacity for low-resolution images, and is straightforward to explain. Adaptive average pooling reduces parameters and permits a compact classifier, although it may discard useful spatial information.
 
