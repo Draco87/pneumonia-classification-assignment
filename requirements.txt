@@ -1,0 +1,13 @@
+torch
+torchvision
+medmnist
+scikit-learn
+matplotlib
+pandas
+pillow
+tqdm
+numpy
+ollama
+streamlit
+pymupdf
+reportlab

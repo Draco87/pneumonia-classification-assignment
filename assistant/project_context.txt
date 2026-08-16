@@ -1,0 +1,425 @@
+PROJECT TITLE
+CPU-Friendly Pneumonia Classification from Pediatric Chest X-Rays
+
+
+1. PROBLEM
+
+The project performs binary classification of pediatric chest X-ray images.
+
+Classes:
+0 = Normal
+1 = Pneumonia
+
+The objective is to identify chest X-rays showing pneumonia.
+
+The model is intended as an experimental medical-image classification and decision-support system. It is not intended to replace a radiologist or provide a clinical diagnosis.
+
+
+2. DATASET
+
+Dataset: PneumoniaMNIST
+Source: MedMNIST
+
+The dataset contains 5,856 pediatric chest X-ray images.
+
+The original images are grayscale chest radiographs. PneumoniaMNIST center-crops and resizes them to 28 x 28 pixels.
+
+Official dataset splits were retained.
+
+Training:
+4,708 images
+Normal: 1,214 (25.79%)
+Pneumonia: 3,494 (74.21%)
+
+Validation:
+524 images
+Normal: 135 (25.76%)
+Pneumonia: 389 (74.24%)
+
+Test:
+624 images
+Normal: 234 (37.50%)
+Pneumonia: 390 (62.50%)
+
+The dataset is class-imbalanced, with pneumonia being the majority class.
+
+
+3. BASELINE MODEL
+
+A lightweight custom convolutional neural network was implemented in PyTorch.
+
+Architecture:
+
+Input:
+1 x 28 x 28 grayscale image
+
+Layer 1:
+Conv2D, 1 input channel, 32 output channels, 3 x 3 kernel
+ReLU
+2 x 2 Max Pooling
+
+Layer 2:
+Conv2D, 32 input channels, 64 output channels, 3 x 3 kernel
+ReLU
+2 x 2 Max Pooling
+
+Layer 3:
+Conv2D, 64 input channels, 128 output channels, 3 x 3 kernel
+ReLU
+
+Adaptive Average Pooling to 1 x 1
+
+Linear classifier:
+128 features -> 1 output logit
+
+No sigmoid layer is included inside the model because BCEWithLogitsLoss combines sigmoid and binary cross-entropy in a numerically stable implementation.
+
+
+4. PREPROCESSING
+
+Images were converted to tensors.
+
+Pixel values were normalized using:
+
+mean = 0.5
+standard deviation = 0.5
+
+This approximately transforms image values from [0, 1] to [-1, 1].
+
+
+5. BASELINE TRAINING
+
+Compute:
+CPU only
+
+Random seed:
+42
+
+Optimizer:
+Adam
+
+Learning rate:
+0.001
+
+Loss:
+BCEWithLogitsLoss
+
+Batch size:
+64
+
+Epochs:
+15
+
+The checkpoint with the lowest validation loss was saved.
+
+Best baseline checkpoint:
+Epoch 14
+
+Best validation loss:
+0.1290
+
+Validation accuracy at epoch 14:
+0.9447
+
+
+6. BASELINE TEST RESULTS
+
+Test samples:
+624
+
+Accuracy:
+0.8910
+
+Pneumonia Precision:
+0.8727
+
+Pneumonia Recall / Sensitivity:
+0.9667
+
+Pneumonia F1:
+0.9173
+
+ROC-AUC:
+0.9595
+
+Normal precision:
+0.9323
+
+Normal recall / specificity:
+0.7650
+
+
+Baseline confusion matrix:
+
+TN = 179
+FP = 55
+FN = 13
+TP = 377
+
+Matrix:
+
+[[179, 55],
+ [13, 377]]
+
+The model therefore detected 377 of the 390 pneumonia test images and missed 13.
+
+Sensitivity:
+96.67%
+
+Specificity:
+76.50%
+
+
+7. WHY ACCURACY IS NOT SUFFICIENT
+
+The dataset is imbalanced.
+
+In the test set, 390 of 624 images are pneumonia cases.
+
+A classifier predicting pneumonia for every test image would therefore obtain an accuracy of 62.5% while completely failing to identify normal images.
+
+For this reason, accuracy is interpreted together with sensitivity, specificity, precision, F1 score, ROC-AUC and the confusion matrix.
+
+
+8. REGULARIZED EXPERIMENT
+
+A second model was trained to investigate whether regularization improved generalization.
+
+Two modifications were introduced simultaneously:
+
+Training augmentation:
+Random rotation of up to +/- 7 degrees
+Translation of up to 5%
+
+Dropout:
+0.3 before the final linear layer
+
+The validation and test images were not augmented.
+
+The regularized model otherwise used the same optimizer, learning rate, batch size, loss function and 15-epoch training duration.
+
+
+9. REGULARIZED MODEL RESULTS
+
+Best validation loss:
+0.1255
+
+Test accuracy:
+0.8638
+
+Pneumonia precision:
+0.8322
+
+Pneumonia recall / sensitivity:
+0.9795
+
+Pneumonia F1:
+0.8999
+
+ROC-AUC:
+0.9620
+
+Normal recall / specificity:
+0.6709
+
+Confusion matrix:
+
+TN = 157
+FP = 77
+FN = 8
+TP = 382
+
+
+10. MODEL COMPARISON — TEST SET
+
+Metric                 Baseline        Regularized
+Accuracy               89.10%          86.38%
+Sensitivity            96.67%          97.95%
+Specificity            76.50%          67.09%
+F1 Score               91.73%          89.99%
+ROC-AUC                 95.95%          96.20%
+False Positives         55              77
+False Negatives         13              8
+
+11. CLASSIFICATION THRESHOLD
+
+The default classification threshold was 0.5.
+
+The model first produces a logit.
+
+A sigmoid operation converts the logit to a probability-like score for pneumonia.
+
+If:
+P(pneumonia) >= 0.5
+the prediction is Pneumonia.
+
+Otherwise:
+the prediction is Normal.
+
+Threshold analysis was performed using the validation set rather than selecting a threshold on the test set.
+
+
+Baseline validation threshold results:
+
+Threshold 0.1:
+Sensitivity = 0.9949
+Specificity = 0.7259
+FP = 37
+FN = 2
+
+Threshold 0.2:
+Sensitivity = 0.9846
+Specificity = 0.8370
+FP = 22
+FN = 6
+
+Threshold 0.3:
+Sensitivity = 0.9692
+Specificity = 0.8593
+FP = 19
+FN = 12
+
+Threshold 0.4:
+Sensitivity = 0.9666
+Specificity = 0.8815
+FP = 16
+FN = 13
+
+Threshold 0.5:
+Sensitivity = 0.9537
+Specificity = 0.9185
+FP = 11
+FN = 18
+
+Threshold 0.6:
+Sensitivity = 0.9332
+Specificity = 0.9630
+FP = 5
+FN = 26
+
+Threshold 0.7:
+Sensitivity = 0.9229
+Specificity = 0.9852
+FP = 2
+FN = 30
+
+Threshold 0.8:
+Sensitivity = 0.8843
+Specificity = 0.9926
+FP = 1
+FN = 45
+
+Threshold 0.9:
+Sensitivity = 0.8175
+Specificity = 0.9926
+FP = 1
+FN = 71
+
+Lower thresholds generally increase sensitivity at the cost of lower specificity.
+
+Higher thresholds generally increase specificity while increasing the number of false negatives.
+
+A real clinical system should choose its decision threshold according to clinically defined sensitivity and specificity requirements rather than assuming 0.5 is optimal.
+
+
+12. FAILURE ANALYSIS
+
+Baseline test failures:
+
+False positives:
+55 normal images classified as pneumonia.
+
+False negatives:
+13 pneumonia images classified as normal.
+
+False negatives are particularly important in a screening-oriented application because they represent pneumonia cases that were not flagged.
+
+False positives are also important because excessive false alarms can lead to unnecessary review, investigation and clinical workload.
+
+The relative costs of false positives and false negatives depend on the actual clinical workflow.
+
+
+13. SAMPLE INFERENCE
+
+A PneumoniaMNIST test image with ground-truth label Pneumonia was exported and processed using inference.py.
+
+Result:
+
+Ground truth:
+Pneumonia
+
+Prediction:
+Pneumonia
+
+Pneumonia probability:
+0.9982
+
+Normal probability:
+0.0018
+
+This is a true-positive example.
+
+This single example demonstrates the inference pipeline but is not used as evidence of overall model performance.
+
+
+14. LIMITATIONS
+
+The input images are only 28 x 28 pixels, so fine radiographic information may be lost.
+
+The dataset contains pediatric chest X-rays and results should not automatically be generalized to adult populations.
+
+The dataset is class-imbalanced.
+
+The dataset distribution may not represent other hospitals, scanners or patient populations.
+
+The system has not undergone external clinical validation.
+
+Predicted scores should not be interpreted as clinically calibrated disease probabilities without calibration analysis.
+
+The fixed 0.5 classification threshold is not necessarily clinically optimal.
+
+The model is an experimental classifier and must not be treated as an autonomous diagnostic system.
+
+The augmentation and dropout changes were introduced in the same experiment, so their individual effects cannot be separated.
+
+
+15. POSSIBLE IMPROVEMENTS
+
+Potential future improvements include:
+
+Use higher-resolution chest X-rays.
+
+Evaluate transfer learning with architectures such as ResNet or MobileNet.
+
+Use larger and more diverse datasets from multiple institutions.
+
+Perform external validation.
+
+Investigate probability calibration.
+
+Select classification thresholds based on predefined clinical sensitivity and specificity requirements.
+
+Conduct systematic hyperparameter optimization.
+
+Investigate class-balancing strategies where appropriate.
+
+Perform separate ablation experiments for augmentation and dropout.
+
+Evaluate ensemble methods.
+
+Investigate self-supervised or medical-domain pretrained representations.
+
+Use explainability methods cautiously to investigate what image regions influence predictions.
+
+Perform prospective clinical validation before any real-world deployment.
+
+
+16. INTERPRETATION
+
+The model should be interpreted as an experimental image-classification system.
+
+A high pneumonia score means that the model found the image more consistent with the pneumonia class based on patterns learned from PneumoniaMNIST.
+
+It does not establish a medical diagnosis.
+
+The system should only be considered as a potential decision-support or screening component with appropriate clinical validation and human oversight.
